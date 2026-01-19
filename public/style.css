@@ -3,6 +3,17 @@ body {
   text-align: center;
 }
 
+input {
+  padding: 5px;
+  margin: 5px;
+}
+
+button {
+  padding: 5px 10px;
+  margin: 5px;
+  cursor: pointer;
+}
+
 #clip-iframe iframe {
   width: 640px;
   height: 360px;
