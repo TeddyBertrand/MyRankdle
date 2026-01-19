@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const socket = io();
 
+  // DOM
   const createBtn = document.getElementById("createBtn");
   const joinBtn = document.getElementById("joinBtn");
   const joinId = document.getElementById("joinId");
@@ -20,78 +21,78 @@ document.addEventListener("DOMContentLoaded", () => {
   let rankLogos = {};
   let ytPlayer;
 
-  // --- Charger les logos ---
-  fetch('rankLogos.json')
-    .then(res => res.json())
-    .then(data => rankLogos = data);
+  // --- Charger logos ---
+  fetch('rankLogos.json').then(r => r.json()).then(data => rankLogos = data);
 
-  // --- Créer Partie ---
+  // --- Créer partie ---
   createBtn.onclick = () => {
     const name = playerNameInput.value.trim();
-    if(!name) { alert("Veuillez entrer un pseudo !"); return; }
+    if(!name){ alert("Veuillez entrer un pseudo !"); return; }
     playerName = name;
     socket.emit("createSession", playerName);
   };
 
-  // --- Rejoindre Partie ---
+  // --- Rejoindre partie ---
   joinBtn.onclick = () => {
     const name = playerNameInput.value.trim();
     const id = joinId.value.trim();
-    if(!name) { alert("Veuillez entrer un pseudo !"); return; }
-    if(!id) { alert("Veuillez entrer l'ID de session !"); return; }
+    if(!name){ alert("Veuillez entrer un pseudo !"); return; }
+    if(!id){ alert("Veuillez entrer l'ID de session !"); return; }
     playerName = name;
-    socket.emit("joinSession", { sessionId: id, name: playerName });
+    socket.emit("joinSession",{ sessionId:id, name:playerName });
   };
 
-  // --- Réception des events ---
-  socket.on("sessionCreated", id => {
-    sessionId = id;
-    alert(`Session créée ! ID: ${id}`);
-  });
-
+  // --- Events ---
+  socket.on("sessionCreated", id => { sessionId = id; alert(`Session créée ! ID: ${id}`); });
   socket.on("sessionJoined", data => {
-    sessionId = data.sessionId;
-    playerId = data.playerId;
-    menu.style.display = "none";
-    game.style.display = "block";
+    sessionId = data.sessionId; playerId = data.playerId;
+    menu.style.display="none"; game.style.display="block";
     updatePlayerInfo(data.players);
-    socket.emit("readyForGame", sessionId); // Préparer la partie
+    socket.emit("readyForGame", sessionId);
   });
 
-  socket.on("playerJoined", data => {
-    updatePlayerInfo(data.players || {});
-  });
+  socket.on("playerJoined", data => { updatePlayerInfo(data.players || {}); });
 
   socket.on("startClip", data => {
     feedbackDiv.innerHTML = "";
-    countdownDiv.innerText = "Préparation...";
     choicesDiv.innerHTML = "";
+    countdownDiv.innerText = "Préparation...";
 
-    // Charger la vidéo en pause
-    ytPlayer.loadVideoById({ videoId: extractVideoId(data.iframeUrl), startSeconds:0 });
-    ytPlayer.pauseVideo();
+    let countdown = 3;
+    countdownDiv.innerText = countdown;
+    const interval = setInterval(() => {
+      countdown--;
+      if(countdown>0) countdownDiv.innerText = countdown;
+      else {
+        clearInterval(interval);
+        countdownDiv.innerText = "GO !";
+        // Jouer la vidéo
+        ytPlayer.loadVideoById({ videoId: extractVideoId(data.iframeUrl), startSeconds:0 });
+        ytPlayer.playVideo();
 
-    setTimeout(()=> ytPlayer.playVideo(), 1000); // Lancer après 1s
-
-    // Créer les boutons rank
-    for(let i=1;i<=9;i++){
-      const btn = document.createElement("button");
-      btn.classList.add("rank-btn");
-      const img = document.createElement("img");
-      img.src = rankLogos[i];
-      img.alt = "Rank "+i;
-      btn.appendChild(img);
-      btn.onclick = () => {
-        socket.emit("chooseRank",{sessionId, rank:i, playerId});
-        btn.classList.add("chosen");
-        feedbackDiv.innerHTML = "En attente de l'autre joueur...";
-      };
-      choicesDiv.appendChild(btn);
-    }
+        // Créer boutons rank
+        for(let i=1;i<=9;i++){
+          const btn = document.createElement("button");
+          btn.classList.add("rank-btn");
+          const img = document.createElement("img");
+          img.src = rankLogos[i]; img.alt="Rank "+i;
+          btn.appendChild(img);
+          btn.onclick = () => {
+            socket.emit("chooseRank",{ sessionId, rank:i, playerId });
+            btn.classList.add("chosen");
+            feedbackDiv.innerHTML = "En attente de l'autre joueur...";
+            // Animation légère
+            img.style.transform="scale(1.2)";
+            setTimeout(()=> img.style.transform="scale(1)",300);
+          };
+          choicesDiv.appendChild(btn);
+        }
+      }
+    }, 1000);
   });
 
   socket.on("roundResult", data => {
-    feedbackDiv.innerHTML = "";
+    feedbackDiv.innerHTML="";
     for(const pId in data.choices){
       const choice = data.choices[pId];
       const name = data.players[pId].name;
@@ -105,26 +106,23 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("gameOver", finalScores => {
-    alert("Game terminé !\n" + JSON.stringify(finalScores, null, 2));
+    alert("Game terminé !\n" + JSON.stringify(finalScores,null,2));
     location.reload();
   });
 
   socket.on("errorMsg", msg => alert(msg));
 
+  // --- Helper ---
   function updatePlayerInfo(players){
-    playerInfoDiv.innerHTML = "";
+    playerInfoDiv.innerHTML="";
     for(const [id,p] of Object.entries(players)){
-      playerInfoDiv.innerHTML += `<div>${p.name}: <span id="score-${id}">${p.score}</span></div>`;
+      playerInfoDiv.innerHTML+=`<div>${p.name}: <span id="score-${id}">${p.score}</span></div>`;
     }
   }
 
-  // --- YouTube IFrame API ---
-  window.onYouTubeIframeAPIReady = function() {
-    ytPlayer = new YT.Player('clip-iframe', {
-      height: '360',
-      width: '640',
-      videoId: '',
-      playerVars: { 'controls': 1, 'rel': 0 }
+  window.onYouTubeIframeAPIReady = function(){
+    ytPlayer = new YT.Player('clip-iframe',{
+      height:'360', width:'640', videoId:'', playerVars:{'controls':1,'rel':0}
     });
   };
 
