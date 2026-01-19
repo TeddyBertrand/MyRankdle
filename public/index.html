@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rankdle Duel 1v1</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Rankdle Duel 1v1</h1>
+
+<div id="menu">
+  <button id="createBtn">Créer Partie</button>
+  <input id="joinId" placeholder="ID Session">
+  <button id="joinBtn">Rejoindre Partie</button>
+</div>
+
+<div id="game" style="display:none;">
+  <div id="clip-container">
+    <iframe id="clip-iframe" width="640" height="360" frameborder="0" allowfullscreen></iframe>
+  </div>
+  <div id="choices"></div>
+  <div id="score"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+.rank-btn {
+  background: transparent;
+  border: none;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.rank-btn img {
+  transition: transform 0.2s;
+}
+
+.rank-btn:hover img {
+  transform: scale(1.1);
+}
