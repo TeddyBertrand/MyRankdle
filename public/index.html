@@ -9,20 +9,25 @@
 <h1>Rankdle Duel 1v1</h1>
 
 <div id="menu">
+  <input id="playerName" placeholder="Votre pseudo">
   <button id="createBtn">Créer Partie</button>
   <input id="joinId" placeholder="ID Session">
   <button id="joinBtn">Rejoindre Partie</button>
 </div>
 
 <div id="game" style="display:none;">
+  <div id="playerInfo"></div>
   <div id="clip-container">
-    <iframe id="clip-iframe" width="640" height="360" frameborder="0" allowfullscreen></iframe>
+    <div id="player-countdown">Prêt ?</div>
+    <div id="clip-iframe"></div>
   </div>
   <div id="choices"></div>
+  <div id="round-feedback"></div>
   <div id="score"></div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
 <script src="client.js"></script>
 </body>
 </html>

@@ -1,3 +1,14 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+#clip-iframe iframe {
+  width: 640px;
+  height: 360px;
+  margin: 10px 0;
+}
+
 .rank-btn {
   background: transparent;
   border: none;
@@ -6,9 +17,16 @@
 }
 
 .rank-btn img {
+  width: 80px;
+  height: 80px;
   transition: transform 0.2s;
 }
 
 .rank-btn:hover img {
   transform: scale(1.1);
+}
+
+.chosen {
+  border: 3px solid gold;
+  border-radius: 10px;
 }
