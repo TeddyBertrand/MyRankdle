@@ -32,10 +32,23 @@ createBtn.onclick = () => {
 };
 
 joinBtn.onclick = () => {
-  playerName = playerNameInput.value.trim() || "Joueur";
+  const name = playerNameInput.value.trim();
   const id = joinId.value.trim();
-  if(id) socket.emit("joinSession", { sessionId: id, name: playerName });
+
+  if (!name) {
+    alert("Veuillez entrer un pseudo !");
+    return;
+  }
+  if (!id) {
+    alert("Veuillez entrer l'ID de session !");
+    return;
+  }
+
+  playerName = name;
+
+  socket.emit("joinSession", { sessionId: id, name: playerName });
 };
+
 
 // --- Socket.io ---
 socket.on("sessionCreated", id => {

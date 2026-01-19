@@ -24,19 +24,26 @@ io.on("connection", socket => {
   });
 
   // Rejoindre une session
-  socket.on("joinSession", sessionId => {
-    const session = sessions[sessionId];
-    if (session && session.players.length < 2) {
-      session.players.push(socket.id);
-      session.scores[socket.id] = 0;
-      socket.join(sessionId);
+socket.on("joinSession", ({ sessionId, name }) => {
+  if (!sessions[sessionId]) {
+    socket.emit("errorMsg", "Session introuvable.");
+    return;
+  }
+  if (!name) {
+    socket.emit("errorMsg", "Pseudo invalide.");
+    return;
+  }
 
-      // Démarrage du premier clip synchronisé
-      io.to(sessionId).emit("startClip", clips[session.clipIndex]);
-    } else {
-      socket.emit("errorMsg", "Session invalide ou pleine.");
-    }
-  });
+  sessions[sessionId].players[socket.id] = { name, score: 0 };
+  socket.join(sessionId);
+
+  // Envoyer info de la session au joueur qui vient de rejoindre
+  socket.emit("sessionJoined", { sessionId, playerId: socket.id, players: sessions[sessionId].players });
+
+  // Informer les autres joueurs
+  socket.to(sessionId).emit("playerJoined", { playerId: socket.id, name });
+});
+
 
   // Réception du choix du rang
   socket.on("chooseRank", ({ sessionId, rank }) => {
